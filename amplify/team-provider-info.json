@@ -14,6 +14,12 @@
     "categories": {
       "auth": {
         "shoppinglisteb124182": {}
+      },
+      "api": {
+        "shoppinglist": {}
+      },
+      "storage": {
+        "s3cb6285cf": {}
       }
     }
   }
