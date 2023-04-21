@@ -26,12 +26,14 @@ export default function NoteUpdateForm(props) {
   const initialValues = {
     name: "",
     description: "",
+    price: "",
     image: "",
   };
   const [name, setName] = React.useState(initialValues.name);
   const [description, setDescription] = React.useState(
     initialValues.description
   );
+  const [price, setPrice] = React.useState(initialValues.price);
   const [image, setImage] = React.useState(initialValues.image);
   const [errors, setErrors] = React.useState({});
   const resetStateValues = () => {
@@ -40,6 +42,7 @@ export default function NoteUpdateForm(props) {
       : initialValues;
     setName(cleanValues.name);
     setDescription(cleanValues.description);
+    setPrice(cleanValues.price);
     setImage(cleanValues.image);
     setErrors({});
   };
@@ -57,6 +60,7 @@ export default function NoteUpdateForm(props) {
   const validations = {
     name: [{ type: "Required" }],
     description: [],
+    price: [{ type: "Required" }],
     image: [],
   };
   const runValidationTasks = async (
@@ -87,6 +91,7 @@ export default function NoteUpdateForm(props) {
         let modelFields = {
           name,
           description,
+          price,
           image,
         };
         const validationResponses = await Promise.all(
@@ -145,6 +150,7 @@ export default function NoteUpdateForm(props) {
             const modelFields = {
               name: value,
               description,
+              price,
               image,
             };
             const result = onChange(modelFields);
@@ -171,6 +177,7 @@ export default function NoteUpdateForm(props) {
             const modelFields = {
               name,
               description: value,
+              price,
               image,
             };
             const result = onChange(modelFields);
@@ -187,6 +194,37 @@ export default function NoteUpdateForm(props) {
         {...getOverrideProps(overrides, "description")}
       ></TextField>
       <TextField
+        label="Price"
+        isRequired={true}
+        isReadOnly={false}
+        type="number"
+        step="any"
+        value={price}
+        onChange={(e) => {
+          let value = isNaN(parseFloat(e.target.value))
+            ? e.target.value
+            : parseFloat(e.target.value);
+          if (onChange) {
+            const modelFields = {
+              name,
+              description,
+              price: value,
+              image,
+            };
+            const result = onChange(modelFields);
+            value = result?.price ?? value;
+          }
+          if (errors.price?.hasError) {
+            runValidationTasks("price", value);
+          }
+          setPrice(value);
+        }}
+        onBlur={() => runValidationTasks("price", price)}
+        errorMessage={errors.price?.errorMessage}
+        hasError={errors.price?.hasError}
+        {...getOverrideProps(overrides, "price")}
+      ></TextField>
+      <TextField
         label="Image"
         isRequired={false}
         isReadOnly={false}
@@ -197,6 +235,7 @@ export default function NoteUpdateForm(props) {
             const modelFields = {
               name,
               description,
+              price,
               image: value,
             };
             const result = onChange(modelFields);

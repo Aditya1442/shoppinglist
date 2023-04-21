@@ -48,6 +48,7 @@ const App = ({ signOut }) => {
     const data = {
       name: form.get("name"),
       description: form.get("description"),
+      price: form.get("price"),
       image: image.name,
     };
     if (!!data.image) await Storage.put(data.name, image);
@@ -73,12 +74,12 @@ const App = ({ signOut }) => {
 
   return (
     <View className="App">
-      <Heading level={1}>Shopping List</Heading>
+      <Heading level={1}>ShoppingList</Heading>
       <View as="form" margin="3rem 0" onSubmit={createNote}>
         <Flex direction="row" justifyContent="center">
           <TextField
             name="name"
-            placeholder="Name"
+            placeholder="Food Name"
             label="Name"
             labelHidden
             variation="quiet"
@@ -86,32 +87,32 @@ const App = ({ signOut }) => {
           />
           <TextField
             name="description"
-            placeholder="Description"
+            placeholder="Food Description"
             label="Description"
             labelHidden
             variation="quiet"
             required
           />
-          <TextField
-            name="Price"
-            placeholder="Price"
+           <TextField
+            name="price"
+            placeholder="Food Price"
             label="Price"
             labelHidden
             variation="quiet"
             required
           />
           <View
-  name="image"
-  as="input"
-  type="file"
-  style={{ alignSelf: "end" }}
-/>
+           name="image"
+           as="input"
+           type="file"
+           style={{ alignSelf: "end" }}
+         />
           <Button type="submit" variation="primary">
-            Create Note
+            Add Item
           </Button>
         </Flex>
       </View>
-      <Heading level={2}>Current Items</Heading>
+      <Heading level={2}>Existing Food Items</Heading>
       <View margin="3rem 0">
       {notes.map((note) => (
   <Flex
@@ -121,9 +122,14 @@ const App = ({ signOut }) => {
     alignItems="center"
   >
     <Text as="strong" fontWeight={700}>
-      {note.name}
+      Name: {note.name}
     </Text>
-    <Text as="span">{note.description}</Text>
+    <Text as="span">
+    Description: {note.description}
+    </Text>
+    <Text as="span">
+      Price: ${note.price}
+    </Text>
     {note.image && (
       <Image
         src={note.image}
@@ -132,7 +138,7 @@ const App = ({ signOut }) => {
       />
     )}
     <Button variation="link" onClick={() => deleteNote(note)}>
-      Delete note
+      Delete Item
     </Button>
   </Flex>
 ))}
