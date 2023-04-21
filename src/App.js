@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "./App.css";
 import "@aws-amplify/ui-react/styles.css";
-import { API, Storage } from 'aws-amplify';
+import { API, Storage } from "aws-amplify";
 import {
   Button,
   Flex,
@@ -11,8 +11,7 @@ import {
   TextField,
   View,
   withAuthenticator,
-} from '@aws-amplify/ui-react';
-
+} from "@aws-amplify/ui-react";
 import { listNotes } from "./graphql/queries";
 import {
   createNote as createNoteMutation,
@@ -44,21 +43,35 @@ const App = ({ signOut }) => {
   async function createNote(event) {
     event.preventDefault();
     const form = new FormData(event.target);
+    
+    // Check if the price input is greater than zero
+    const priceInput = form.get("price");
+    const price = parseFloat(priceInput);
+    
+    if (isNaN(price) || price <= 0) {
+      alert("Please enter a valid price.");
+      return;
+    }
+    
+    
     const image = form.get("image");
     const data = {
       name: form.get("name"),
       description: form.get("description"),
       image: image.name,
+      price: price,
     };
+    
     if (!!data.image) await Storage.put(data.name, image);
+    
     await API.graphql({
       query: createNoteMutation,
       variables: { input: data },
     });
+    
     fetchNotes();
     event.target.reset();
   }
-  
 
   async function deleteNote({ id, name }) {
     const newNotes = notes.filter((note) => note.id !== id);
@@ -69,7 +82,6 @@ const App = ({ signOut }) => {
       variables: { input: { id } },
     });
   }
-
 
   return (
     <View className="App">
@@ -92,12 +104,19 @@ const App = ({ signOut }) => {
             variation="quiet"
             required
           />
-          <View
-  name="image"
-  as="input"
-  type="file"
-  style={{ alignSelf: "end" }}
-/>
+          <TextField
+            name="price"
+            placeholder="Note Price"
+            label="Note Price"
+            labelHidden
+            variation="quiet"
+            required
+          />
+          <input
+            name="image"
+            type="file"
+            style={{ alignSelf: "end" }}
+          />
           <Button type="submit" variation="primary">
             Create Note
           </Button>
@@ -105,33 +124,33 @@ const App = ({ signOut }) => {
       </View>
       <Heading level={2}>Current Notes</Heading>
       <View margin="3rem 0">
-      {notes.map((note) => (
-  <Flex
-    key={note.id || note.name}
-    direction="row"
-    justifyContent="center"
-    alignItems="center"
-  >
-    <Text as="strong" fontWeight={700}>
-      {note.name}
-    </Text>
-    <Text as="span">{note.description}</Text>
-    {note.image && (
-      <Image
-        src={note.image}
-        alt={`visual aid for ${notes.name}`}
-        style={{ width: 400 }}
-      />
-    )}
-    <Button variation="link" onClick={() => deleteNote(note)}>
-      Delete note
-    </Button>
-  </Flex>
-))}
+        {notes.map((note) => (
+          <Flex
+            key={note.id || note.name}
+            direction="row"
+            justifyContent="center"
+            alignItems="center"
+          >
+            <Text as="strong" fontWeight={700}>
+              {note.name}
+            </Text>
+            <Text as="span">{note.description}</Text>
+            {note.image && (
+              <Image
+                src={note.image}
+                alt={`visual aid for ${note.name}`}
+                style={{ width: 400 }}
+              />
+            )}
+            <Button variation="link" onClick={() => deleteNote(note)}>
+              Delete note
+            </Button>
+          </Flex>
+        ))}
+        </View>
+        <Button onClick={signOut}>Sign Out</Button>
       </View>
-      <Button onClick={signOut}>Sign Out</Button>
-    </View>
-  );
-};
-
-export default withAuthenticator(App);
+    );
+  };
+  
+  export default withAuthenticator(App);
