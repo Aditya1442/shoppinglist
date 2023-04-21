@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "./App.css";
 import "@aws-amplify/ui-react/styles.css";
-import { API, Storage } from 'aws-amplify';
+import { API, Storage } from "aws-amplify";
 import {
   Button,
   Flex,
@@ -11,7 +11,7 @@ import {
   TextField,
   View,
   withAuthenticator,
-} from '@aws-amplify/ui-react';
+} from "@aws-amplify/ui-react";
 
 import { listNotes } from "./graphql/queries";
 import {
@@ -21,10 +21,17 @@ import {
 
 const App = ({ signOut }) => {
   const [notes, setNotes] = useState([]);
+  const [totalPrice, setTotalPrice] = useState(0);
 
   useEffect(() => {
     fetchNotes();
   }, []);
+
+  useEffect(() => {
+    setTotalPrice(
+      notes.reduce((acc, note) => acc + parseFloat(note.price), 0)
+    );
+  }, [notes]);
 
   async function fetchNotes() {
     const apiData = await API.graphql({ query: listNotes });
@@ -59,7 +66,6 @@ const App = ({ signOut }) => {
     fetchNotes();
     event.target.reset();
   }
-  
 
   async function deleteNote({ id, name }) {
     const newNotes = notes.filter((note) => note.id !== id);
@@ -70,7 +76,6 @@ const App = ({ signOut }) => {
       variables: { input: { id } },
     });
   }
-
 
   return (
     <View className="App">
@@ -93,7 +98,7 @@ const App = ({ signOut }) => {
             variation="quiet"
             required
           />
-           <TextField
+          <TextField
             name="price"
             placeholder="Food Price"
             label="Price"
@@ -102,11 +107,11 @@ const App = ({ signOut }) => {
             required
           />
           <View
-           name="image"
-           as="input"
-           type="file"
-           style={{ alignSelf: "end" }}
-         />
+            name="image"
+            as="input"
+            type="file"
+            style={{ alignSelf: "end" }}
+          />
           <Button type="submit" variation="primary">
             Add Item
           </Button>
@@ -114,38 +119,46 @@ const App = ({ signOut }) => {
       </View>
       <Heading level={2}>Existing Food Items</Heading>
       <View margin="3rem 0">
-      {notes.map((note) => (
-  <Flex
-    key={note.id || note.name}
-    direction="row"
-    justifyContent="center"
-    alignItems="center"
-  >
-    <Text as="strong" fontWeight={700}>
-      Name: {note.name}
-    </Text>
-    <Text as="span">
-    Description: {note.description}
-    </Text>
-    <Text as="span">
-      Price: ${note.price}
-    </Text>
-    {note.image && (
-      <Image
-        src={note.image}
-        alt={`visual aid for ${notes.name}`}
-        style={{ width: 400 }}
-      />
-    )}
-    <Button variation="link" onClick={() => deleteNote(note)}>
-      Delete Item
-    </Button>
-  </Flex>
-))}
+        {notes.map((note) => (
+          <Flex
+            key={note.id || note.name}
+            direction="row"
+            alignItems="center"
+            justifyContent="space-between"
+            margin="1rem 0"
+          >
+            <Flex direction="row" alignItems="center">
+              {note.image && (
+                <Image
+                  src={note.image}
+                  alt={`Image of ${note.name}`}
+                  objectFit="cover"
+                  width="10rem"
+                  height="10rem"
+                  marginRight="1rem"
+                  marginLeft="10rem"
+                />
+              )}
+              <View>
+                <Heading level={3}>{note.name}</Heading>
+                <Text>{note.description}</Text>
+                <Text fontWeight="bold">${note.price}</Text>
+              </View>
+            </Flex>
+            <Button
+              variation="danger"
+              onClick={() => deleteNote({ id: note.id, name: note.name })}
+              marginRight="20rem"
+            >
+              Delete
+            </Button>
+          </Flex>
+        ))}
       </View>
-      <Button onClick={signOut}>Sign Out</Button>
+      <Text>Total Price of Items: ${totalPrice.toFixed(2)}</Text>
+      <Button onClick={() => signOut()}>Sign Out</Button>
     </View>
-  );
+);
 };
 
-export default withAuthenticator(App);
+export default withAuthenticator(App);    
